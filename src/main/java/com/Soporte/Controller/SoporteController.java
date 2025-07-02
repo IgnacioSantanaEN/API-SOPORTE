@@ -2,6 +2,7 @@ package com.Soporte.Controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.Soporte.DTO.SoporteDTO;
 import com.Soporte.Model.Soporte;
 import com.Soporte.Service.SoporteService;
 
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 
 @RestController
 @RequestMapping("/api/soporte")
@@ -46,6 +46,15 @@ public class SoporteController {
         }
     }
 
+    @GetMapping("/Resumen")
+    public ResponseEntity<?> getTicketCliente(){
+        List<SoporteDTO> soporteDTOs = soporteService.findAll().stream()
+        .map(s -> new SoporteDTO(s.getIdUsuario(), s.getDescripcion(), s.getTipoTicket()))
+        .toList();
+
+        return ResponseEntity.ok(soporteDTOs);
+    }
+    
     @PostMapping("/")
     public ResponseEntity<?> create(@RequestBody Soporte soporte) {
         Soporte nuevo = soporteService.save(soporte);
