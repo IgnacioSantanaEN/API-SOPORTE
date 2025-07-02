@@ -2,6 +2,7 @@ package com.Soporte.Model;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,13 +18,26 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Soporte {
-    @Id
+     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_ticket;
-    private Integer id_usuario;
-    private String tipo_ticket;
+    @Column(name = "id_ticket")
+    private Integer idTicket;
+
+    @Column(name = "id_usuario")
+    private Integer idUsuario;
+
+    @Column(name = "tipo_ticket")
+    private String tipoTicket;
+
+    @Column(name = "descripcion")
     private String descripcion;
+
+    @Column(name = "estado")
     private String estado;
-    private LocalDate fecha_creacion;
-    private LocalDate fecha_resolucion;
+
+    @Column(name = "fecha_creacion")
+    private LocalDate fechaCreacion;
+    
+    @Column(name = "fecha_resolucion")
+    private LocalDate fechaResolucion;
 }
