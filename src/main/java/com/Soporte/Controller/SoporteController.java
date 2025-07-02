@@ -2,6 +2,7 @@ package com.Soporte.Controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.Soporte.DTO.SoporteCreateDTO;
 import com.Soporte.DTO.SoporteDTO;
 import com.Soporte.Model.Soporte;
 import com.Soporte.Service.SoporteService;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,26 @@ public class SoporteController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
         .body(new Mensaje("Recurso creado con exito: " + nuevo.getIdTicket()));
+    }
+
+    @PostMapping("/cliente")
+    public ResponseEntity<?> createCliente(@RequestBody SoporteCreateDTO dto){
+        Soporte soporte = new Soporte();
+        soporte.setIdUsuario(dto.getIdUsuario());
+        soporte.setTipoTicket(dto.getTipoTicket());
+        soporte.setDescripcion(dto.getDescripcion());
+        soporte.setEstado("Abierto");
+        soporte.setFechaCreacion(LocalDate.now());
+
+        Soporte nuevo = soporteService.save(soporte);
+
+        if (nuevo == null) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body(new Mensaje("No se ha podido crear el ticket"));
+    }
+
+    return ResponseEntity.status(HttpStatus.CREATED)
+                         .body(new Mensaje("Ticket creado con éxito: " + nuevo.getIdTicket()));
     }
 
     @PutMapping("/{id}")
