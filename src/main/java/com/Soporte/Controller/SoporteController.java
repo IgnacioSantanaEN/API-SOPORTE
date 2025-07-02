@@ -103,6 +103,17 @@ public class SoporteController {
         existente.setFechaCreacion(soporte.getFechaCreacion());
         existente.setFechaResolucion(soporte.getFechaResolucion());
 
+        existente.setTipoTicket(soporte.getTipoTicket());
+        existente.setDescripcion(soporte.getDescripcion());
+
+        if (soporte.getEstado() != null) {
+            existente.setEstado(soporte.getEstado());
+        }
+
+        if (soporte.getFechaResolucion() != null) {
+            existente.setFechaResolucion(soporte.getFechaResolucion());
+        }
+
         soporteService.save(existente);
 
         return ResponseEntity.ok(existente);
