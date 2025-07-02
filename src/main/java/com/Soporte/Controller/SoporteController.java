@@ -3,7 +3,8 @@ package com.Soporte.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Soporte.DTO.SoporteCreateDTO;
-import com.Soporte.DTO.SoporteDTO;
+import com.Soporte.DTO.SoporteModel;
+import com.Soporte.Mapper.SoporteHateoasMapper;
 import com.Soporte.Model.Soporte;
 import com.Soporte.Service.SoporteService;
 
@@ -47,15 +48,6 @@ public class SoporteController {
             .body(new Mensaje("Ticket no encontrado: " + id));
         }
     }
-
-    @GetMapping("/Resumen")
-    public ResponseEntity<?> getTicketCliente(){
-        List<SoporteDTO> soporteDTOs = soporteService.findAll().stream()
-        .map(s -> new SoporteDTO(s.getIdUsuario(), s.getDescripcion(), s.getTipoTicket()))
-        .toList();
-
-        return ResponseEntity.ok(soporteDTOs);
-    }
     
     @PostMapping("/")
     public ResponseEntity<?> create(@RequestBody Soporte soporte) {
@@ -81,11 +73,12 @@ public class SoporteController {
 
         if (nuevo == null) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                             .body(new Mensaje("No se ha podido crear el ticket"));
-    }
+            .body(new Mensaje("No se ha podido crear el ticket"));
+        }
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-                         .body(new Mensaje("Ticket creado con éxito: " + nuevo.getIdTicket()));
+        SoporteModel model = SoporteHateoasMapper.toModel(nuevo);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
     @PutMapping("/{id}")
@@ -99,15 +92,13 @@ public class SoporteController {
         
         existente.setTipoTicket(soporte.getTipoTicket());
         existente.setDescripcion(soporte.getDescripcion());
-        existente.setEstado(soporte.getEstado());
-        existente.setFechaCreacion(soporte.getFechaCreacion());
-        existente.setFechaResolucion(soporte.getFechaResolucion());
-
-        existente.setTipoTicket(soporte.getTipoTicket());
-        existente.setDescripcion(soporte.getDescripcion());
 
         if (soporte.getEstado() != null) {
             existente.setEstado(soporte.getEstado());
+        }   
+
+        if (soporte.getFechaCreacion() != null) {
+        existente.setFechaCreacion(soporte.getFechaCreacion());
         }
 
         if (soporte.getFechaResolucion() != null) {
