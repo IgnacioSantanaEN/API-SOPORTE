@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SoporteDTO {
-    private Integer idUsuario;
-    private String descripcion;
-    private String tipoTicket;
+    private Integer idTicket;
+    private String link;
 }

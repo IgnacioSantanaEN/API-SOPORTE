@@ -2,9 +2,8 @@ package com.Soporte.Controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.Soporte.DTO.SoporteCreateDTO;
-import com.Soporte.DTO.SoporteModel;
-import com.Soporte.Mapper.SoporteHateoasMapper;
+import com.Soporte.DTO.SoporteDTO;
+import com.Soporte.Mapper.SoporteMapper;
 import com.Soporte.Model.Soporte;
 import com.Soporte.Service.SoporteService;
 
@@ -12,8 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,52 +32,42 @@ public class SoporteController {
     private SoporteService soporteService;
 
     @GetMapping("/")
-    public ResponseEntity<List<Soporte>> getAll() {
-        return ResponseEntity.ok(soporteService.findAll());
+    public ResponseEntity<?> getAll() {
+        List<Soporte> tickets = soporteService.findAll();
+
+        if (tickets.isEmpty()) {
+            return ResponseEntity.ok(new Mensaje("No se han encontrado tickets de soporte"));
+        }
+
+        List<SoporteDTO> dtos = tickets.stream()
+            .map(SoporteMapper::toDTO)
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {
         Soporte soporte = soporteService.findById(id);
-    
+
         if (soporte != null) {
             return ResponseEntity.ok(soporte);
         } else {
-            return ResponseEntity.status(404)
-            .body(new Mensaje("Ticket no encontrado: " + id));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new Mensaje("Ticket no encontrado: " + id));
         }
     }
-    
+
     @PostMapping("/")
     public ResponseEntity<?> create(@RequestBody Soporte soporte) {
         Soporte nuevo = soporteService.save(soporte);
-        if(nuevo == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Mensaje("No se ha podido crear la solicitud"));
+        if (nuevo == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new Mensaje("No se ha podido crear la solicitud"));
         }
 
         return ResponseEntity.status(HttpStatus.CREATED)
-        .body(new Mensaje("Recurso creado con exito: " + nuevo.getIdTicket()));
-    }
-
-    @PostMapping("/cliente")
-    public ResponseEntity<?> createCliente(@RequestBody SoporteCreateDTO dto){
-        Soporte soporte = new Soporte();
-        soporte.setIdUsuario(dto.getIdUsuario());
-        soporte.setTipoTicket(dto.getTipoTicket());
-        soporte.setDescripcion(dto.getDescripcion());
-        soporte.setEstado("Abierto");
-        soporte.setFechaCreacion(LocalDate.now());
-
-        Soporte nuevo = soporteService.save(soporte);
-
-        if (nuevo == null) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new Mensaje("No se ha podido crear el ticket"));
-        }
-
-        SoporteModel model = SoporteHateoasMapper.toModel(nuevo);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(model);
+            .body(new Mensaje("Recurso creado con éxito: " + nuevo.getIdTicket()));
     }
 
     @PutMapping("/{id}")
@@ -87,27 +76,25 @@ public class SoporteController {
 
         if (existente == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body(new Mensaje("Recurso no encontrado: " + id));
-        }    
-        
+                .body(new Mensaje("Recurso no encontrado: " + id));
+        }
+
         existente.setTipoTicket(soporte.getTipoTicket());
         existente.setDescripcion(soporte.getDescripcion());
 
         if (soporte.getEstado() != null) {
             existente.setEstado(soporte.getEstado());
-        }   
-
-        if (soporte.getFechaCreacion() != null) {
-        existente.setFechaCreacion(soporte.getFechaCreacion());
         }
-
+        if (soporte.getFechaCreacion() != null) {
+            existente.setFechaCreacion(soporte.getFechaCreacion());
+        }
         if (soporte.getFechaResolucion() != null) {
             existente.setFechaResolucion(soporte.getFechaResolucion());
         }
 
         soporteService.save(existente);
 
-        return ResponseEntity.ok(existente);
+        return ResponseEntity.ok(new Mensaje("Recurso actualizado correctamente: " + id));
     }
 
     @DeleteMapping("/{id}")

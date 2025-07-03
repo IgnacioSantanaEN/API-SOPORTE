@@ -8,9 +8,8 @@ public class SoporteMapper {
         if (soporte == null) return null;
 
         return new SoporteDTO(
-            soporte.getIdUsuario(),
-            soporte.getDescripcion(),
-            soporte.getTipoTicket()
+            soporte.getIdTicket(),
+            "http://localhost:8083/api/soporte/" + soporte.getIdTicket()
         );
     }
 
@@ -18,9 +17,7 @@ public class SoporteMapper {
         if (dto == null) return null;
 
         Soporte soporte = new Soporte();
-        soporte.setIdUsuario(dto.getIdUsuario());
-        soporte.setDescripcion(dto.getDescripcion());
-        soporte.setTipoTicket(dto.getTipoTicket());
+        soporte.setIdTicket(dto.getIdTicket());
         return soporte;
     }
 }
