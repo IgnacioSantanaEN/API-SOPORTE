@@ -3,7 +3,6 @@ package com.Soporte.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Soporte.DTO.SoporteDTO;
-import com.Soporte.Mapper.SoporteMapper;
 import com.Soporte.Model.Soporte;
 import com.Soporte.Service.SoporteService;
 
@@ -12,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,26 +27,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/soporte")
 public class SoporteController {
     @Autowired
-    private SoporteService soporteService;
+    private SoporteService service;
 
     @GetMapping("/")
     public ResponseEntity<?> getAll() {
-        List<Soporte> tickets = soporteService.findAll();
+        List<SoporteDTO> tickets = service.findAll();
 
         if (tickets.isEmpty()) {
             return ResponseEntity.ok(new Mensaje("No se han encontrado tickets de soporte"));
         }
 
-        List<SoporteDTO> dtos = tickets.stream()
-            .map(SoporteMapper::toDTO)
-            .collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(tickets);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {
-        Soporte soporte = soporteService.findById(id);
+        Soporte soporte = service.findById(id);
 
         if (soporte != null) {
             return ResponseEntity.ok(soporte);
@@ -60,7 +54,7 @@ public class SoporteController {
 
     @PostMapping("/")
     public ResponseEntity<?> create(@RequestBody Soporte soporte) {
-        Soporte nuevo = soporteService.save(soporte);
+        Soporte nuevo = service.save(soporte);
         if (nuevo == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new Mensaje("No se ha podido crear la solicitud"));
@@ -72,7 +66,7 @@ public class SoporteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Soporte soporte) {
-        Soporte existente = soporteService.findById(id);
+        Soporte existente = service.findById(id);
 
         if (existente == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -92,14 +86,14 @@ public class SoporteController {
             existente.setFechaResolucion(soporte.getFechaResolucion());
         }
 
-        soporteService.save(existente);
+        service.save(existente);
 
-        return ResponseEntity.ok(new Mensaje("Recurso actualizado correctamente: " + id));
+        return ResponseEntity.ok(new Mensaje("Recurso actualizado correctamente: " + existente));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
-        if (soporteService.deleteById(id)) {
+        if (service.deleteById(id)) {
             return ResponseEntity.ok("Ticket eliminado con éxito");
         }
         return ResponseEntity.status(404)
